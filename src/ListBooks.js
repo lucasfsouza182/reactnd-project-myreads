@@ -8,15 +8,17 @@ import BookItem from './BookItem';
 
 class ListBooks extends React.Component {
 	static propTypes = {
-		books: PropTypes.array.isRequired
+		books: PropTypes.array.isRequired,
+		alterShelf: PropTypes.func.isRequired
 	}
 	
+	//Pattern ex: currentlyReading.
 	patternShelf = (shelf) => (
     shelf.charAt(0).toLowerCase() + shelf.slice(1).replace(/\s/g, "")
   )
 
 	render(){
-		const { books } = this.props;
+		const { books , alterShelf } = this.props;
 		const shelfs = ["Currently Reading", "Want To Read", "Read"]
 		
 	return(
@@ -32,7 +34,7 @@ class ListBooks extends React.Component {
 						<div className="bookshelf-books">
 							<ol className="books-grid">
 								{books.filter(book => book.shelf === this.patternShelf(shelf)).map(book => (
-									<BookItem book={book} key={book.id} />
+									<BookItem book={book} key={book.id} alterShelf={alterShelf}/>
 								))}
 							</ol>
 						</div>

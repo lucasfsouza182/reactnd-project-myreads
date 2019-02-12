@@ -14,7 +14,20 @@ class BooksApp extends React.Component {
 		BooksAPI.getAll().then(books => this.setState({
 			books
     }))
-	}
+  }
+  
+  alterShelf = (book,shelf) => {
+    BooksAPI.update(book,shelf).then(() => {
+      let myBooks = this.state.books;
+      myBooks.map(myBook => (
+        myBook.id === book.id ? myBook.shelf = shelf : myBooks
+      ))
+      console.log(book)
+      console.log(myBooks)
+      this.setState({
+        books: myBooks
+      })})
+  }
 
   render() {
     const { books } = this.state;
@@ -25,7 +38,7 @@ class BooksApp extends React.Component {
 			)} />
 
 			<Route exact path='/' render={() => (
-        <ListBooks books = {books}/>
+        <ListBooks books = {books} alterShelf={this.alterShelf}/>
         )}
 			/>
       </div>
