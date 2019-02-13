@@ -4,31 +4,35 @@ import './App.css'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types';
 import BookItem from './BookItem';
+import CircularIndeterminate from "./CircularIndeterminate"
 
 
 class SearchBook extends React.Component {
 	static propTypes = {
-		books: PropTypes.array.isRequired
+    books: PropTypes.array.isRequired,
+    alterShelf: PropTypes.func.isRequired
 	}
 
   state = {
 	 myBooks:[],
     books: [],
-    query: ''
+	 query: '',
+	 loading: false
   }
 
   componentDidMount() {
     if (this.props.books.length !== 0) {
-      this.setState({
-      myBooks: this.props.books
+		this.setState({
+			myBooks: this.props.books
       })
     } 
   }
 
   updateQuery = (query) => {
-	if(query.length !== 0) {
+	if(query.length > 0) {
 		this.setState(() => ({
-			query: query.trim()
+			query: query,
+			loading: true
 		 }))
 	
 		 BooksAPI.search(query).then(
@@ -36,13 +40,14 @@ class SearchBook extends React.Component {
 				const filteredBooks = this.filterBooksByTitle(query, this.state.myBooks);
 			   let result = []
 				if (response.error === undefined) {
-          console.log(response)
-					result = response.concat(filteredBooks)
+					const filteredResponse = this.filterBooksByTitle(query, response);
+					result = this.removeRepeatedBooks(filteredResponse,filteredBooks)
 				} else {
 					result = filteredBooks
 				}
 				this.setState({
-					books: result
+					books: result,
+					loading: false
 				})
         }
       )
@@ -54,17 +59,30 @@ class SearchBook extends React.Component {
     }
   }
 
-  filterBooksByTitle = (query, myBooks) => {
-    query  = query.toLowerCase()
-	  const filteredBooks = myBooks.filter(myBook => (
-	    myBook.title.toLowerCase().includes(query) 
-    ))
-    console.log(filteredBooks)
+  filterBooksByTitle = (query, books) => {
+		query  = query.toLowerCase()
+		const filteredBooks = books.filter(book => (
+			book.title.toLowerCase().includes(query) 
+		))
+		console.log("myBooks")
+    	console.log(filteredBooks)
     return filteredBooks
   }
 
+	removeRepeatedBooks = (response,filteredBooks) =>{
+		filteredBooks.map(book => (
+		response.map((bookResponse, index) => {
+			if (book.id === bookResponse.id) {
+				response.splice(index, 1)
+			}
+		})
+		))
+		return filteredBooks.concat(response)
+	}
+
     render() {
-		const { books, query } = this.state;
+		const { books, query , loading} = this.state;
+		const { alterShelf } = this.props;
       return(
         <div className="search-books">
               <div className="search-books-bar">
@@ -83,19 +101,19 @@ class SearchBook extends React.Component {
                   <input
                     className='search-contacts'
                     type='text'
-                    placeholder='Search by title or author'
+                    placeholder='Search by title'
                     value={query}
                     onChange={(event) => this.updateQuery(event.target.value)}
                     />
-
                 </div>
               </div>
               <div className="search-books-results">
-                <ol className="books-grid">
+				   {loading && <CircularIndeterminate /> }
+               <ol className="books-grid">
                 	{books.length >= 1 && books.map(book => (
-              			<BookItem book={book} key={book.id} />
+              			<BookItem book={book} key={book.id} alterShelf={alterShelf}/>
             		))}
-                </ol>
+               </ol>
               </div>
             </div>
 

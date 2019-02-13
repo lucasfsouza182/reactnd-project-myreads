@@ -4,6 +4,7 @@ import './App.css'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types';
 import BookItem from './BookItem';
+import CircularIndeterminate from "./CircularIndeterminate"
 
 
 class ListBooks extends React.Component {
@@ -18,7 +19,7 @@ class ListBooks extends React.Component {
   )
 
 	render(){
-		const { books , alterShelf } = this.props;
+		const { books , alterShelf , loading } = this.props;
 		const shelfs = ["Currently Reading", "Want To Read", "Read"]
 		
 	return(
@@ -28,6 +29,7 @@ class ListBooks extends React.Component {
 			</div>
 			<div className="list-books-content">
 				<div>
+				{loading && <CircularIndeterminate /> }
 				{shelfs.map(shelf => (
 					<div className="bookshelf" key = {shelf}>
 						<h2 className="bookshelf-title">{shelf}</h2>

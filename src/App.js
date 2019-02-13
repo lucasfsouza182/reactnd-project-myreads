@@ -7,16 +7,24 @@ import ListBooks from './ListBooks'
 
 class BooksApp extends React.Component {
   state = {
-    books: []
+    books: [],
+    loading: false
   }
 
   componentDidMount() {
+    this.setState({
+      loading: true
+    })
 		BooksAPI.getAll().then(books => this.setState({
-			books
+      books,
+      loading: false
     }))
   }
   
   alterShelf = (book,shelf) => {
+    this.setState({
+      loading: true
+    })
     BooksAPI.update(book,shelf).then(() => {
       let myBooks = this.state.books;
       myBooks.map(myBook => (
@@ -25,20 +33,21 @@ class BooksApp extends React.Component {
       console.log(book)
       console.log(myBooks)
       this.setState({
-        books: myBooks
+        books: myBooks,
+        loading: false
       })})
   }
 
   render() {
-    const { books } = this.state;
+    const { books,loading } = this.state;
     return (
       <div className="app">
 			<Route path='/search' render={({ history }) => (
-				<SearchBook books = {books}/>
+				<SearchBook books = {books} alterShelf={this.alterShelf} />
 			)} />
 
 			<Route exact path='/' render={() => (
-        <ListBooks books = {books} alterShelf={this.alterShelf}/>
+        	<ListBooks books = {books} alterShelf={this.alterShelf} loading={loading}/>
         )}
 			/>
       </div>
