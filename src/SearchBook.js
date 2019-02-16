@@ -4,20 +4,21 @@ import './App.css'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types';
 import BookItem from './BookItem';
-import CircularIndeterminate from "./CircularIndeterminate"
+import Loading from "./Loading"
 
 
 class SearchBook extends React.Component {
 	static propTypes = {
     books: PropTypes.array.isRequired,
+    loading: PropTypes.bool.isRequired,
     alterShelf: PropTypes.func.isRequired
 	}
 
   state = {
 	 myBooks:[],
-    books: [],
+   books: [],
 	 query: '',
-	 loading: false
+   loading: false   
   }
 
   componentDidMount() {
@@ -29,12 +30,11 @@ class SearchBook extends React.Component {
   }
 
   updateQuery = (query) => {
-	if(query.length > 0) {
+	if(query.length !== 0) {
 		this.setState(() => ({
 			query: query,
 			loading: true
 		 }))
-	
 		 BooksAPI.search(query).then(
 			response => {
 				const filteredBooks = this.filterBooksByTitle(query, this.state.myBooks);
@@ -64,8 +64,6 @@ class SearchBook extends React.Component {
 		const filteredBooks = books.filter(book => (
 			book.title.toLowerCase().includes(query) 
 		))
-		console.log("myBooks")
-    	console.log(filteredBooks)
     return filteredBooks
   }
 
@@ -74,7 +72,8 @@ class SearchBook extends React.Component {
 		response.map((bookResponse, index) => {
 			if (book.id === bookResponse.id) {
 				response.splice(index, 1)
-			}
+      }
+      return filteredBooks.concat(response)
 		})
 		))
 		return filteredBooks.concat(response)
@@ -86,7 +85,7 @@ class SearchBook extends React.Component {
       return(
         <div className="search-books">
               <div className="search-books-bar">
-              <Link className='close-search' to='/'>
+              <Link className='close-search' to={{ pathname: '/', state: this.state.myBooks }}>>
                   Close
               </Link>
                 <div className="search-books-input-wrapper">
@@ -108,7 +107,7 @@ class SearchBook extends React.Component {
                 </div>
               </div>
               <div className="search-books-results">
-				   {loading && <CircularIndeterminate /> }
+              {loading && <Loading /> }
                <ol className="books-grid">
                 	{books.length >= 1 && books.map(book => (
               			<BookItem book={book} key={book.id} alterShelf={alterShelf}/>
