@@ -37,11 +37,10 @@ class SearchBook extends React.Component {
   updateQuery = (query) => {
 		 BooksAPI.search(query).then(
 			response => {
-				const filteredBooks = this.filterBooksByTitle(query, this.state.myBooks);
+        const filteredBooks = this.filterBooksByTitle(query, this.state.myBooks);
 			   let result = []
 				if (response.error === undefined) {
-					const filteredResponse = this.filterBooksByTitle(query, response);
-					result = this.removeRepeatedBooks(filteredResponse,filteredBooks)
+					result = this.removeRepeatedBooks(response,filteredBooks)
 				} else {
 					result = filteredBooks
 				}
@@ -72,9 +71,10 @@ class SearchBook extends React.Component {
   }
 
   filterBooksByTitle = (query, books) => {
-		query  = query.toLowerCase()
+    query  = query.toLowerCase()
+    console.log(books)
 		const filteredBooks = books.filter(book => (
-			book.title.toLowerCase().includes(query) 
+			book.title.toLowerCase().includes(query) || (book.subtitle && book.subtitle.toLowerCase().includes(query))
 		))
     return filteredBooks
   }
