@@ -12,13 +12,18 @@ class SearchBook extends React.Component {
     books: PropTypes.array.isRequired,
     loading: PropTypes.bool.isRequired,
     alterShelf: PropTypes.func.isRequired
-	}
+  }
+  
+  constructor(props) {
+    super(props)
+    this.timer = 0
+  }
 
   state = {
 	 myBooks:[],
    books: [],
 	 query: '',
-   loading: false   
+   loading: false 
   }
 
   componentDidMount() {
@@ -30,11 +35,6 @@ class SearchBook extends React.Component {
   }
 
   updateQuery = (query) => {
-	if(query.length !== 0) {
-		this.setState(() => ({
-			query: query,
-			loading: true
-		 }))
 		 BooksAPI.search(query).then(
 			response => {
 				const filteredBooks = this.filterBooksByTitle(query, this.state.myBooks);
@@ -48,15 +48,27 @@ class SearchBook extends React.Component {
 				this.setState({
 					books: result,
 					loading: false
-				})
+        })
         }
       )
-    } else {
+  }
+
+  search = (query) => {
+    clearTimeout(this.timer);
+    if(query.length !== 0) {      
       this.setState(() => ({
-        books: [],
-        query: query
-      }))
-    }
+        query: query,
+        loading: true
+       }))
+       this.timer = setTimeout(() => {this.updateQuery(query)}, 2000);
+    } else {
+      this.timer = 0;
+        this.setState(() => ({
+          books: [],
+          query: query,
+          loading: false
+        }))
+      } 
   }
 
   filterBooksByTitle = (query, books) => {
@@ -102,7 +114,7 @@ class SearchBook extends React.Component {
                     type='text'
                     placeholder='Search by title'
                     value={query}
-                    onChange={(event) => this.updateQuery(event.target.value)}
+                    onChange={(event) => this.search(event.target.value)}
                     />
                 </div>
               </div>
